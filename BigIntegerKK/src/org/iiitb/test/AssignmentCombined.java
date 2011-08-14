@@ -335,7 +335,7 @@ public class AssignmentCombined {
 		// writer.write(n + "," + impl.getBestSoln().setDiff + ","
 		// + impl.getElapsedTime() + ",CKK\n");
 		//
-		writer.write("," + impl.getBestSoln().setDiff + ","
+		writer.write("," + impl.getBestSoln().getSetDifference() + ","
 				+ impl.getElapsedTime());
 
 		// writer.flush();

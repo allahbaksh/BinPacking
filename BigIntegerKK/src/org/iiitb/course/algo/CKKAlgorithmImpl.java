@@ -3,8 +3,6 @@
  */
 package org.iiitb.course.algo;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,38 +14,95 @@ import java.util.List;
 import org.iiitb.course.algo.util.Element;
 import org.iiitb.course.algo.util.ElementComparator;
 import org.iiitb.course.algo.util.ProjectUtils;
-import org.iiitb.test.RandomNumberGenerator;
 
 /**
  * @author Allahbaksh_Asadullah
  * 
  */
 public class CKKAlgorithmImpl {
-
+	/**
+	 * The elements
+	 */
 	private Element[] elements;
-	// private ArrayList<SolnSet> solns = new ArrayList<SolnSet>();
+	/**
+	 * This is kept right now to do testing
+	 */
+	private ArrayList<SolnSet> solns = new ArrayList<SolnSet>();
 
-	// 60 seconds is better!
+	/**
+	 * Get solution which are available within 60sec. We need not count KK for
+	 * this. i.e first iteration should be avoided
+	 */
 	private static final long TIME_LIMIT = 1000 * 60;
+	/**
+	 * This is set to false. Meaning we need not backtrack. Just we can find out
+	 * the set difference and leave it.
+	 */
+	private boolean backTrack = false;
+
+	private SolnSet lastBestSet;
 
 	long time;
 	long solnCount;
-	boolean doExit = false;
+	/**
+	 * This specifies whether we need exit from the program. This is set once
+	 * 60sec or more than time is encountered
+	 * 
+	 */
+	private boolean doExit = false;
+
+	/**
+	 * This can be a long or integer.
+	 */
+	protected BigInteger differenceOfTwoSets = null;
 
 	public static class SolnSet {
-		List<Element> list1;
-		List<Element> list2;
-		public BigInteger setDiff;
+		private List<Element> list1;
+		private List<Element> list2;
+		private BigInteger setDiff;
+
+		public BigInteger getSetDifference() {
+			return setDiff;
+		}
+
+		public List<Element> getList1() {
+			return list1;
+		}
+
+		public List<Element> getList2() {
+			return list2;
+		}
 	}
 
-	SolnSet lastBestSet;
-
+	/**
+	 * Default constructor
+	 */
 	public CKKAlgorithmImpl() {
 	}
 
+	/**
+	 * Sets back tracking
+	 * 
+	 * @param inBackTrack
+	 */
+	public CKKAlgorithmImpl(boolean inBackTrack) {
+		backTrack = inBackTrack;
+	}
+
+	/**
+	 * Specifies the Elements
+	 * 
+	 * @param inElements
+	 */
 	public CKKAlgorithmImpl(Element[] inElements) {
 		elements = inElements;
+		Arrays.sort(elements, new ElementComparator());
 		time = new Date().getTime();
+	}
+
+	public CKKAlgorithmImpl(Element[] inElement, boolean inBackTrack) {
+		this(inElement);
+		backTrack = inBackTrack;
 	}
 
 	/**
@@ -62,6 +117,11 @@ public class CKKAlgorithmImpl {
 		}
 		Arrays.sort(elements, new ElementComparator());
 		time = new Date().getTime();
+	}
+
+	public CKKAlgorithmImpl(BigInteger[] integers, boolean inBackTrack) {
+		this(integers);
+		backTrack = inBackTrack;
 	}
 
 	private void constructNode(final Element[] elementArray) {
@@ -91,8 +151,6 @@ public class CKKAlgorithmImpl {
 				elementArray.length);
 		newElementArray[0] = newElement;
 
-		// MergeSortElements sort = new MergeSortElements(newElementArray);
-		// sort.sort(newElementArray);
 		Arrays.sort(newElementArray, new ElementComparator());
 
 		// printElementArr(newElementArray);
@@ -115,9 +173,9 @@ public class CKKAlgorithmImpl {
 
 		// dont construct any tree if this is not a valid right node!
 		BigInteger restSum = sumNminusTwo(elementArray);
-		if (sumOfNumber.compareTo(restSum) >= 0)
+		if (sumOfNumber.compareTo(restSum) >= 0) {
 			return;
-
+		}
 		Element newElement = new Element(sumOfNumber, elementArray[0],
 				elementArray[1], true);
 		Element[] newElementArray = Arrays.copyOfRange(elementArray, 1,
@@ -127,39 +185,6 @@ public class CKKAlgorithmImpl {
 		Arrays.sort(newElementArray, new ElementComparator());
 
 		constructNode(newElementArray);
-	}
-
-	private boolean isValidRightNode(Element[] arrayElement) {
-		if (arrayElement.length == 1) {
-			// if(arrayElement[0].getNumber()==2){
-			backTrack(arrayElement[0]);
-			// }
-			return false;
-		}
-
-		BigInteger sum = getSumOfElements(arrayElement);
-
-		// Do pruning
-		int val = arrayElement[0].getNumber().compareTo(sum);
-		if (val >= 0) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Get the sum array excluding first element array. FIXME Move it to Util
-	 * 
-	 * @param arrayElement
-	 * @return
-	 */
-	private static BigInteger getSumOfElements(Element[] arrayElement) {
-		BigInteger sum = new BigInteger("0");
-		for (int i = 1; i < arrayElement.length; i++) {
-			sum = sum.add(arrayElement[i].getNumber());
-		}
-		// System.out.println("Sum " + sum);
-		return sum;
 	}
 
 	/**
@@ -182,9 +207,18 @@ public class CKKAlgorithmImpl {
 
 			return true;
 		}
-		// if(arrayElement[0].getNumber()==2){
-		backTrack(arrayElement[0]);
-		// }
+		if (backTrack) {
+			backTrack(arrayElement[0]);
+		}
+		BigInteger integer = arrayElement[0].getNumber().subtract(
+				arrayElement[1].getNumber());
+		if (differenceOfTwoSets == null) {
+			differenceOfTwoSets = integer;
+		}
+		if (integer.compareTo(differenceOfTwoSets) == -1) {
+			differenceOfTwoSets = integer;
+		}
+
 		return false;
 
 	}
@@ -218,6 +252,7 @@ public class CKKAlgorithmImpl {
 		// System.out.println("Solution: " + (solnCount) + ", Set Diff: " +
 		// diff1);
 
+		// FIXME Add to array list to get all solution
 		if ((lastBestSet != null && diff1.compareTo(lastBestSet.setDiff) < 0)
 				|| (lastBestSet == null)) {
 
@@ -322,66 +357,6 @@ public class CKKAlgorithmImpl {
 			new1[i] = new BigInteger(new String("") + arr[i]);
 
 		return new1;
-	}
-
-	/**
-	 * For testing purpose
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-
-		int nums[] = { 15, 9, 8, 7, 6, 5, 4 };
-		BigInteger numbers[] = getBigInts(nums);
-
-		int r1 = 10;
-		int r2 = 11;
-		int maxSetSize = 210;// it needs to be 2000
-		int maxIter = 5;// it needs to be 10000
-
-		final BigInteger range[] = ProjectUtils.createBigIntArr(r1, r2);
-
-		for (int r = r1; r <= r2; r++) {
-
-			try {
-				final String fileName = "ckkRange" + r + ".csv";
-				FileWriter writer = new FileWriter(fileName);
-				writer.write("Number,Time Taken, BestSetDiff, noOfSolns, timedout\n");
-
-				RandomNumberGenerator generator = new RandomNumberGenerator();
-				BigInteger range1 = range[r - r1];
-
-				// To plot the graph we need to have many data points.
-				for (int n = 200; n < maxSetSize; n++) {
-
-					// for each data point, repeat the experiment for maxIter
-					// times
-					for (int j2 = 1; j2 <= maxIter; j2++) {
-
-						System.out.println("Set Size " + n + ", Iter " + j2);
-						BigInteger[] bigInts = generator
-								.generateRandomIntegers(n, range1);
-
-						CKKAlgorithmImpl ckk = new CKKAlgorithmImpl(bigInts);
-						ckk.constructNode();
-
-						// TODO Write the following to the file
-						// size, time, bestdifff, howmany soln, timed-out
-						writer.write(n + "," + ckk.getElapsedTime() + ","
-								+ ckk.getBestSoln().setDiff + ", "
-								+ ckk.getSolnCount() + ","
-								+ (ckk.doExit ? "1" : "0") + "\n");
-					}
-					// System.out.println("range " + r + ", size " + n
-					// + " complete");
-				}
-				// System.out.println("range " + r + " done");
-				writer.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 
 }
