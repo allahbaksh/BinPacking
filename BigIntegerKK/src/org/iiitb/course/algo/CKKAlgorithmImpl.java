@@ -207,16 +207,16 @@ public class CKKAlgorithmImpl {
 
 			return true;
 		}
-		if (backTrack) {
-			backTrack(arrayElement[0]);
-		}
-		BigInteger integer = arrayElement[0].getNumber().subtract(
-				arrayElement[1].getNumber());
+
+		BigInteger integer = arrayElement[0].getNumber();
 		if (differenceOfTwoSets == null) {
 			differenceOfTwoSets = integer;
 		}
 		if (integer.compareTo(differenceOfTwoSets) == -1) {
 			differenceOfTwoSets = integer;
+		}
+		if (backTrack) {
+			backTrack(arrayElement[0]);
 		}
 
 		return false;
