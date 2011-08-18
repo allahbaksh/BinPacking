@@ -29,6 +29,12 @@ public class PKKAlgorithmImpl {
 
 	private Packet[] packet;
 
+	/**
+	 * This is set to false. Meaning we need not backtrack. Just we can find out
+	 * the set difference and leave it.
+	 */
+	private boolean backTrack = false;
+
 	public PKKAlgorithmImpl(BigInteger[] integers, int numberOfPacket) {
 		PacketGenerator generator = new PacketGenerator(integers,
 				numberOfPacket);
@@ -37,6 +43,13 @@ public class PKKAlgorithmImpl {
 		numberOfPackets = numberOfPacket;
 		listOfListA = new ArrayList<List<Element>>();
 		listOfListB = new ArrayList<List<Element>>();
+	}
+
+	public PKKAlgorithmImpl(BigInteger[] integers, int numberOfPacket,
+			boolean inBackTrack) {
+		this(integers, numberOfPacket);
+		backTrack = inBackTrack;
+
 	}
 
 	/**
@@ -48,6 +61,8 @@ public class PKKAlgorithmImpl {
 	public void constructAndCalculateSetDiff() {
 		listA = new ArrayList<Element>();
 		listB = new ArrayList<Element>();
+		// FIXME For num ber of packet greater than 2 we need to fix
+		BigInteger setDiff[] = new BigInteger[2];
 		for (int i = 0; i < numberOfPackets; i++) {
 
 			KKAlgorithmImpl impl = new KKAlgorithmImpl(
@@ -55,12 +70,13 @@ public class PKKAlgorithmImpl {
 			impl.constructAndCalculateSetDiff();
 			listOfListA.add(impl.listA);
 			listOfListB.add(impl.listB);
-
+			setDiff[i] = impl.differenceOfTwoSets;
 			// listA.addAll(impl.listA);
 			// listB.addAll(impl.listB);
 		}
+		setDifference = (setDiff[0].subtract(setDiff[1])).abs();
 		time = new Date().getTime() - time;
-		createMinSetDiff();
+		// createMinSetDiff();
 		// setDifference = ProjectUtils.calculateSetDifference(listA, listB);
 	}
 

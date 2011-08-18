@@ -54,7 +54,7 @@ public class CKKAlgorithmImpl {
 	/**
 	 * This can be a long or integer.
 	 */
-	protected BigInteger differenceOfTwoSets = null;
+	public BigInteger differenceOfTwoSets = null;
 
 	public static class SolnSet {
 		private List<Element> list1;
@@ -208,7 +208,7 @@ public class CKKAlgorithmImpl {
 			return true;
 		}
 
-		BigInteger integer = arrayElement[0].getNumber();
+		final BigInteger integer = arrayElement[0].getNumber();
 		if (differenceOfTwoSets == null) {
 			differenceOfTwoSets = integer;
 		}
@@ -216,7 +216,7 @@ public class CKKAlgorithmImpl {
 			differenceOfTwoSets = integer;
 		}
 		if (backTrack) {
-			backTrack(arrayElement[0]);
+			backTrack(arrayElement[0], integer);
 		}
 
 		return false;
@@ -230,7 +230,7 @@ public class CKKAlgorithmImpl {
 		System.out.println();
 	}
 
-	public void backTrack(Element element) {
+	public void backTrack(Element element, final BigInteger diff) {
 		// System.out.println("Back tracking");
 		ArrayList<Element> list1 = new ArrayList<Element>();
 		ArrayList<Element> list2 = new ArrayList<Element>();
@@ -241,29 +241,27 @@ public class CKKAlgorithmImpl {
 		while (hasBar(list1, list2) || hasBar(list2, list1)) {
 
 		}
-		// System.out.println("Solution: " + (++solnCount));
-		// System.out.print("Array List 1: ");
-		// printArrayList(list1);
-		// System.out.print("Array List 2: ");
-		// printArrayList(list2);
 
 		solnCount++;
-		BigInteger diff1 = ProjectUtils.calculateSetDifference(list1, list2);
-		// System.out.println("Solution: " + (solnCount) + ", Set Diff: " +
-		// diff1);
 
+		SolnSet newSet = new SolnSet();
+		newSet.setDiff = diff;
+		newSet.list1 = list1;
+		newSet.list2 = list2;
+		ProjectUtils.printArrayElements(list1, "Element of Array 1");
+		ProjectUtils.printArrayElements(list2, "Element of Array 2");
+		solns.add(newSet);
 		// FIXME Add to array list to get all solution
-		if ((lastBestSet != null && diff1.compareTo(lastBestSet.setDiff) < 0)
+		if ((lastBestSet != null && diff.compareTo(lastBestSet.setDiff) < 0)
 				|| (lastBestSet == null)) {
 
 			lastBestSet = new SolnSet();
 			lastBestSet.list1 = list1;
 			lastBestSet.list2 = list2;
-			lastBestSet.setDiff = diff1;
+			lastBestSet.setDiff = diff;
 		}
 
 		// if the time exceeds the limit, stop
-		// long t1 = new Date().getTime();
 		long t1 = System.currentTimeMillis();
 		if ((t1 - time) > TIME_LIMIT) {
 			time = t1 - time;
@@ -273,8 +271,8 @@ public class CKKAlgorithmImpl {
 			// System.out.println("------------");
 			return;
 		}
-		if (diff1.compareTo(BigInteger.ONE) == 0
-				|| diff1.compareTo(BigInteger.ZERO) == 0) {
+		if (diff.compareTo(BigInteger.ONE) == 0
+				|| diff.compareTo(BigInteger.ZERO) == 0) {
 			time = t1 - time;
 			doExit = true;
 			// System.out.println("Soln found ");
@@ -312,6 +310,13 @@ public class CKKAlgorithmImpl {
 		//
 		// Arrays.sort(newArray, new SolnComparator());
 		// return newArray[0];
+		SolnSet newSolnArray[] = new SolnSet[solns.size()];
+		for (int i = 0; i < solns.size(); i++) {
+			newSolnArray[i] = solns.get(i);
+		}
+
+		// Arrays.sort(newSolnArray, new SolnComparator());
+		// return newSolnArray[0];
 		return lastBestSet;
 	}
 
@@ -328,9 +333,10 @@ public class CKKAlgorithmImpl {
 
 			switch (o1.compareTo(o2)) {
 			case -1:
-				return 1;
-			case 1:
+
 				return -1;
+			case 1:
+				return 1;
 			case 0:
 				return 0;
 

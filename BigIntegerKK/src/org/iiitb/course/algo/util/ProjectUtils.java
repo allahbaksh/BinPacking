@@ -42,7 +42,7 @@ public final class ProjectUtils {
 
 	public static final void printArrayElements(List<Element> listOfElements,
 			String message) {
-		// System.out.print(message+ "  ");
+		// System.out.print(message + "  ");
 		// for (Iterator<Element> iterator = listOfElements.iterator(); iterator
 		// .hasNext();) {
 		// Element element = iterator.next();

@@ -38,6 +38,12 @@ public class KKAlgorithmImpl {
 	private Element[] elements;
 
 	/**
+	 * This is set to false. Meaning we need not backtrack. Just we can find out
+	 * the set difference and leave it.
+	 */
+	private boolean backTrack = false;
+
+	/**
 	 * This constructor is usually called from PKK and in CKK
 	 * 
 	 * @param inElements
@@ -53,6 +59,16 @@ public class KKAlgorithmImpl {
 		}
 
 		time = new Date().getTime();
+	}
+
+	public KKAlgorithmImpl(Element[] inElements, boolean inBackTrack) {
+		this(inElements);
+		backTrack = inBackTrack;
+	}
+
+	public KKAlgorithmImpl(BigInteger[] integers, boolean inBackTrack) {
+		this(integers);
+		backTrack = inBackTrack;
 	}
 
 	/**
@@ -84,6 +100,10 @@ public class KKAlgorithmImpl {
 	 * @param stack
 	 */
 	protected void reconstructElement(Element a, Element b, Stack<Element> stack) {
+		differenceOfTwoSets = a.getNumber().subtract(b.getNumber());
+		if (!backTrack) {
+			return;
+		}
 		ArrayList<Element> elementsA = new ArrayList<Element>();
 		ArrayList<Element> elementsB = new ArrayList<Element>();
 		elementsA.add(a);
@@ -141,11 +161,11 @@ public class KKAlgorithmImpl {
 		ProjectUtils.printArrayElements(elementsB, "Element of Set B");
 		listA = elementsA;
 		listB = elementsB;
-		BigInteger setDifference = ProjectUtils.calculateSetDifference(
-				elementsA, elementsB);
-		differenceOfTwoSets = setDifference;
+		// TODO This depends upon how we put the sets
+		// BigInteger setDifference = ProjectUtils.calculateSetDifference(
+		// elementsA, elementsB);
+		// differenceOfTwoSets = setDifference;
 		// System.out.println("Set Difference is  " + setDifference);
-
 	}
 
 	/**
